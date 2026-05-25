@@ -1,0 +1,2 @@
+date,code,news_count,sentiment_mean,sentiment_max,sentiment_min,positive_count,negative_count,announcement_score,social_heat,event_count,event_positive_count,event_negative_count,event_risk_count,event_confidence_mean,event_duration_mean,event_strength_mean,event_strength_max,event_strength_min,event_super_positive_count,event_super_negative_count,event_priced_in_count
+2026-04-22,sh.600036,1,0.9,0.9,0.9,1,0,0.9,1.0,1,1,0,0,0.9,20,0.9,0.9,0.9,1,0,0

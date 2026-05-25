@@ -1,0 +1,20 @@
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Generated market data and experiment outputs
+stockdata/
+stockdata_*/
+newsdata/*.csv
+newsdata/*.json
+models/
+img/
+img_*/
+log/
+reports/
+*.pkl
+
+# Keep small sample files for tests
+!newsdata/sample_*.csv
