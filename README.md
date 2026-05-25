@@ -3,7 +3,8 @@
 基于 [ytq0198/RL-Stock](https://github.com/ytq0198/RL-Stock) 思路演进的深度强化学习股票交易 Agent 系统。使用 baostock 下载 A 股日线数据，自定义 `gymnasium` 交易环境，以 `stable-baselines3` PPO 为下层策略，并扩展多层 Agent（Planner、世界模型、风控、执行层）及新闻/公告/事件特征融合。
 
 **官方仓库**：[ytq0198/Deep-Learning-Based-Stock-Trading-Agent-System](https://github.com/ytq0198/Deep-Learning-Based-Stock-Trading-Agent-System)  
-**设计文档**：[项目设计.md](项目设计.md)
+**设计文档**：[项目设计.md](项目设计.md)  
+**许可证**：[MIT](LICENSE)
 
 > 免责声明：本项目只用于学习和模拟实验，不构成投资建议。强化学习回测收益不代表真实交易收益。
 
