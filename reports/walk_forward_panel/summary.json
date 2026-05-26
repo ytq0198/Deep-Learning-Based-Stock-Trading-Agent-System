@@ -1,0 +1,20 @@
+{
+  "rule_event": {
+    "windows": 12,
+    "final_net_worth": 8882.88192874438,
+    "total_profit": -1117.1180712556197,
+    "trade_windows": 7
+  },
+  "rule_event_planner": {
+    "windows": 12,
+    "final_net_worth": 8877.321543561258,
+    "total_profit": -1122.6784564387417,
+    "trade_windows": 6
+  },
+  "ppo_panel": {
+    "windows": 12,
+    "final_net_worth": 12463.633141762646,
+    "total_profit": 2463.633141762646,
+    "trade_windows": 5
+  }
+}

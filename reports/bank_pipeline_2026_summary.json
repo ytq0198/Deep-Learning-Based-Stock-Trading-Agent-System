@@ -1,0 +1,24 @@
+{
+  "date_range": "2024-01-02 to 2026-05-25",
+  "stocks": 20,
+  "panel_rows": 11520,
+  "panel_train_rows": 9200,
+  "panel_test_rows": 2320,
+  "strong_event_rows": 138,
+  "announcements_total": 5328,
+  "feature_baseline": {
+    "random_forest_auc": 0.5024,
+    "logistic_regression_auc": 0.5112
+  },
+  "walk_forward_12_windows": {
+    "rule_event_profit": -1117.12,
+    "rule_event_trade_windows": 7,
+    "rule_event_planner_profit": -1122.68,
+    "ppo_panel_profit": 2463.63,
+    "ppo_panel_trade_windows": 5
+  },
+  "ppo_training_50k": {
+    "explained_variance_peak": 0.449,
+    "opportunity_cost_penalty": 2.0
+  }
+}

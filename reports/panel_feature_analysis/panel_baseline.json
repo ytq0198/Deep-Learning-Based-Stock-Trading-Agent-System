@@ -1,0 +1,43 @@
+{
+  "feature_set": "full",
+  "train_rows": 9199,
+  "test_rows": 2319,
+  "stocks": 20,
+  "features": [
+    "pctChg",
+    "turn",
+    "volume_spike",
+    "pre_3d_return",
+    "pre_5d_return",
+    "pre_20d_return",
+    "sentiment_mean",
+    "social_heat",
+    "event_count",
+    "event_positive_count",
+    "event_negative_count",
+    "event_risk_count",
+    "event_confidence_mean",
+    "event_duration_mean",
+    "event_super_positive_count",
+    "event_super_negative_count",
+    "has_strong_event"
+  ],
+  "models": {
+    "logistic_regression": {
+      "accuracy": 0.46959896507115134,
+      "auc": 0.5112388761123887
+    },
+    "random_forest": {
+      "accuracy": 0.5157395429064252,
+      "auc": 0.5023951451008745
+    }
+  },
+  "correlations": {
+    "event_super_positive_count": -0.003350886552610948,
+    "event_super_negative_count": 0.0026376843805264558,
+    "event_strength_mean": -0.0029349662694967923,
+    "announcement_score": 9.986788468884181e-05,
+    "pre_5d_return": 0.0021741609623071216,
+    "volume_spike": -0.004763241772373621
+  }
+}
