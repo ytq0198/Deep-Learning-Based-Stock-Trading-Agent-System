@@ -7,7 +7,8 @@ from pathlib import Path
 import pandas as pd
 
 from bank_universe import BANK_STOCKS
-from news import RuleBasedEventExtractor, RuleBasedSentimentScorer, build_daily_sentiment_features, save_news_csv
+from news import RuleBasedSentimentScorer, build_daily_sentiment_features, save_news_csv
+from news.event_factory import create_event_extractor
 from news.akshare_announcement import fetch_announcement_items
 from news.event_extractor import _is_announcement_item
 from news.merge_features import merge_sentiment_features
@@ -23,6 +24,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--codes", nargs="*", help="Optional subset of baostock codes.")
     parser.add_argument("--skip-existing", action="store_true")
     parser.add_argument("--max-pages", type=int, default=20)
+    parser.add_argument(
+        "--use-llm",
+        action="store_true",
+        help="Use LLM for event extraction (needs OPENAI_API_KEY or LLM_API_KEY).",
+    )
     return parser.parse_args()
 
 
@@ -34,7 +40,7 @@ def main() -> None:
     news_root.mkdir(parents=True, exist_ok=True)
 
     selected = [stock for stock in BANK_STOCKS if not args.codes or stock.code in args.codes]
-    event_extractor = RuleBasedEventExtractor()
+    event_extractor = create_event_extractor(use_llm=args.use_llm)
     scorer = RuleBasedSentimentScorer()
     combined_features: list[pd.DataFrame] = []
     manifest = []

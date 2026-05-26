@@ -159,6 +159,13 @@ python walk_forward_panel.py --strategies rule_event,ppo_panel --opportunity-cos
 
 核心脚本：`bank_universe.py`、`MultiStockTradingEnv`、`panel_dynamic_data.py`。
 
+可选 LLM 公告抽取（需 API，见 [docs/llm_setup.md](docs/llm_setup.md)）：
+
+```bash
+set LLM_API_KEY=your-key
+python run_bank_alpha_pipeline.py --use-llm
+```
+
 新闻特征默认后移一天，避免训练时偷看未来。
 
 用同一个随机种子进行无新闻和新闻融合对比：

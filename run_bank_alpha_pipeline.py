@@ -15,6 +15,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--skip-announcements", action="store_true")
     parser.add_argument("--skip-train", action="store_true")
     parser.add_argument("--timesteps", type=int, default=50000)
+    parser.add_argument("--use-llm", action="store_true", help="Use LLM event extraction in announcement pipeline.")
     return parser.parse_args()
 
 
@@ -39,18 +40,19 @@ def main() -> None:
             ]
         )
     if not args.skip_announcements:
-        steps.append(
-            [
-                python,
-                "batch_announcement_pipeline.py",
-                "--start-date",
-                args.start_date,
-                "--end-date",
-                args.end_date,
-                "--skip-existing",
-                *code_args,
-            ]
-        )
+        ann_cmd = [
+            python,
+            "batch_announcement_pipeline.py",
+            "--start-date",
+            args.start_date,
+            "--end-date",
+            args.end_date,
+            "--skip-existing",
+            *code_args,
+        ]
+        if args.use_llm:
+            ann_cmd.append("--use-llm")
+        steps.append(ann_cmd)
     steps.extend(
         [
             [python, "build_panel_dataset.py"],

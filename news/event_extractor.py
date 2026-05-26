@@ -244,21 +244,29 @@ class LLMEventExtractor:
         return [self.extract(item) for item in items]
 
 
-def build_event_prompt(item: NewsItem) -> str:
-    return f"""请把以下银行股相关新闻结构化为严格 JSON，不要输出解释。
+def build_event_prompt(item: NewsItem, price_context: str = "") -> str:
+    context_block = f"\n价格上下文（若有）:\n{price_context}\n" if price_context else ""
+    return f"""请把以下银行股公告结构化为严格 JSON，不要输出解释。
+
+思考要点:
+1. 识别事件类型（财报、分红、回购、增持、监管处罚、融资等）。
+2. 结合价格上下文判断利好是否已被市场提前兑现（price-in）。
+3. 金额/比例类信息（如“增持不低于20亿元”）应提高 event_strength。
 
 字段:
-- event_type: 事件类型，例如 asset_quality_negative, dividend, policy_pressure, market_panic, other
+- event_type: 字符串，如 earnings_forecast_positive, dividend_plan, buyback_plan, insider_buy, regulatory_penalty, other
 - impact_direction: positive / negative / neutral
-- impact_duration_days: 预计影响天数，整数
+- impact_duration_days: 整数
 - confidence_score: 0 到 1
-- event_strength: -1 到 1，表示事件强度
-- is_super_event: true / false，是否为重大事件
-- is_priced_in: true / false，是否可能已经被市场提前消化
+- event_strength: -1 到 1
+- is_super_event: true / false
+- is_priced_in: true / false
+- planner_action_modifier: -1 到 1，建议仓位修正（利好未兑现可正，已兑现或利空为负）
 
 股票代码: {item.code}
 标题: {item.title}
 正文: {item.content}
+{context_block}
 """
 
 
