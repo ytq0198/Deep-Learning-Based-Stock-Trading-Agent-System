@@ -14,6 +14,9 @@ img/
 img_*/
 log/
 reports/
+!reports/bank_pipeline_2026_summary.json
+!reports/panel_feature_analysis/
+!reports/walk_forward_panel/
 *.pkl
 
 # Keep small sample files for tests
