@@ -21,6 +21,7 @@ from news import (
     save_quality_report,
     save_news_csv,
 )
+from news.event_extractor import _is_announcement_item
 from news.merge_features import merge_directory
 import pandas as pd
 
@@ -68,6 +69,16 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--make-demo-news", action="store_true")
     parser.add_argument("--no-shift", action="store_true", help="Do not shift news features to next day.")
+    parser.add_argument(
+        "--announcement-only",
+        action="store_true",
+        help="Keep only official announcement items (drop guba/social noise).",
+    )
+    parser.add_argument(
+        "--sparse-strong-events",
+        action="store_true",
+        help="Zero sentiment/social features on days without a strong event.",
+    )
     return parser.parse_args()
 
 
@@ -75,6 +86,8 @@ def main() -> None:
     args = parse_args()
     raw_news_path = Path(args.news_csv)
     items = collect_news_items(args)
+    if args.announcement_only:
+        items = [item for item in items if _is_announcement_item(item)]
     save_news_csv(items, raw_news_path)
 
     scorer = RuleBasedSentimentScorer()
@@ -85,6 +98,7 @@ def main() -> None:
         sentiment_results,
         shift_to_next_day=not args.no_shift,
         event_results=event_results,
+        sparse_strong_events=args.sparse_strong_events,
     )
 
     features_path = Path(args.features_csv)

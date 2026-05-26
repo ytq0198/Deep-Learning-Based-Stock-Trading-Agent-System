@@ -5,3 +5,4 @@ gymnasium
 stable-baselines3
 baostock
 scikit-learn
+akshare

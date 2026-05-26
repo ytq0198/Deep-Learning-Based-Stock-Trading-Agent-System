@@ -12,6 +12,7 @@ def build_daily_sentiment_features(
     results: list[SentimentResult],
     shift_to_next_day: bool = True,
     event_results: list[EventResult] | None = None,
+    sparse_strong_events: bool = False,
 ) -> pd.DataFrame:
     """Aggregate scored news into daily stock features.
 
@@ -55,7 +56,45 @@ def build_daily_sentiment_features(
 
     event_features = build_daily_event_features(event_results or [], shift_to_next_day)
     merged = sentiment_features.merge(event_features, how="outer", on=["date", "code"])
-    return _ensure_feature_columns(merged).fillna(0)
+    merged = _ensure_feature_columns(merged).fillna(0)
+    if sparse_strong_events:
+        merged = apply_sparse_strong_events(merged)
+    return merged
+
+
+def apply_sparse_strong_events(features: pd.DataFrame) -> pd.DataFrame:
+    """Zero out dense sentiment noise on days without a strong event signal."""
+    frame = features.copy()
+    strong_mask = (
+        (frame["event_super_positive_count"] > 0)
+        | (frame["event_super_negative_count"] > 0)
+        | (frame["event_strength_max"].abs() >= 0.75)
+    )
+    noise_columns = [
+        "news_count",
+        "sentiment_mean",
+        "sentiment_max",
+        "sentiment_min",
+        "positive_count",
+        "negative_count",
+        "announcement_score",
+        "social_heat",
+    ]
+    for column in noise_columns:
+        if column in frame.columns:
+            frame.loc[~strong_mask, column] = 0.0
+    frame["has_strong_event"] = strong_mask.astype(int)
+    for column in [
+        "event_count",
+        "event_positive_count",
+        "event_negative_count",
+        "event_strength_mean",
+        "event_super_positive_count",
+        "event_super_negative_count",
+    ]:
+        if column in frame.columns:
+            frame.loc[~strong_mask, column] = 0.0
+    return frame
 
 
 def build_daily_event_features(

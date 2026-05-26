@@ -73,6 +73,12 @@ def _add_price_context(df: pd.DataFrame) -> pd.DataFrame:
     if "close" not in df.columns:
         return df
 
+    if "code" in df.columns and df["code"].nunique() > 1:
+        parts = []
+        for _, group in df.groupby("code", sort=False):
+            parts.append(_add_price_context(group.reset_index(drop=True)))
+        return pd.concat(parts, ignore_index=True)
+
     close = pd.to_numeric(df["close"], errors="coerce").ffill().fillna(0.0)
     for window in [3, 5, 20]:
         df[f"pre_{window}d_return"] = close.pct_change(window).fillna(0.0)

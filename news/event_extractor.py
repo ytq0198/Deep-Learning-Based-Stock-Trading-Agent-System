@@ -70,12 +70,96 @@ class RuleBasedEventExtractor:
         EventRule("industry_risk", "negative", 15, 0.65, ("行业风险", "政策限制", "风险扰动", "债务", "坏账", "地产链风险")),
         EventRule("market_panic", "negative", 5, 0.55, ("扛不住", "恐慌", "阴跌", "要绿", "投诉")),
         EventRule("market_heat", "neutral", 3, 0.45, ("热议", "满仓", "散户", "集中营", "讨论", "人气", "热度")),
+        # Formal announcement titles (Eastmoney / exchange filings).
+        EventRule(
+            "earnings_forecast_positive",
+            "positive",
+            20,
+            0.88,
+            ("业绩预告", "业绩预增", "预增", "扭亏为盈", "业绩快报", "净利润同比增长", "盈利预增"),
+            super_event=True,
+        ),
+        EventRule(
+            "earnings_forecast_negative",
+            "negative",
+            20,
+            0.88,
+            ("业绩预减", "预减", "预亏", "首亏", "业绩快报", "净利润同比下降", "亏损"),
+            super_event=True,
+        ),
+        EventRule(
+            "annual_report_positive",
+            "positive",
+            15,
+            0.8,
+            ("年度报告", "年报", "净利润增长", "营业收入增长", "资产质量稳定"),
+            super_event=True,
+        ),
+        EventRule(
+            "semi_annual_report",
+            "positive",
+            12,
+            0.75,
+            ("半年度报告", "半年报", "中期业绩"),
+            super_event=True,
+        ),
+        EventRule(
+            "dividend_plan",
+            "positive",
+            12,
+            0.78,
+            ("利润分配", "分红", "派息", "现金分红", "股息", "每10股派"),
+            super_event=True,
+        ),
+        EventRule(
+            "buyback_plan",
+            "positive",
+            15,
+            0.82,
+            ("回购公司股份", "股份回购", "回购方案", "回购进展"),
+            super_event=True,
+        ),
+        EventRule(
+            "regulatory_penalty",
+            "negative",
+            30,
+            0.92,
+            ("行政处罚", "监管函", "立案调查", "风险提示公告", "重大违法"),
+            super_event=True,
+        ),
+        EventRule(
+            "credit_risk_warning",
+            "negative",
+            20,
+            0.85,
+            ("不良率上升", "拨备计提", "资产减值", "信用减值", "逾期贷款"),
+            super_event=True,
+        ),
+        EventRule(
+            "capital_raise",
+            "negative",
+            15,
+            0.7,
+            ("非公开发行", "配股", "增发", "可转债", "募资"),
+        ),
+        EventRule(
+            "management_change",
+            "neutral",
+            5,
+            0.5,
+            ("董事长辞职", "行长变更", "高级管理人员变动"),
+        ),
     ]
+
+    guba_noise_rules = frozenset({"market_panic", "market_heat"})
 
     def extract(self, item: NewsItem) -> EventResult:
         text = f"{item.title} {item.content}"
         matches: list[tuple[EventRule, list[str]]] = []
+        announcement = _is_announcement_item(item)
         for rule in self.rules:
+            if announcement and rule.event_type in self.guba_noise_rules:
+                continue
             matched = [keyword for keyword in rule.keywords if keyword in text]
             if matched:
                 matches.append((rule, matched))
@@ -101,6 +185,9 @@ class RuleBasedEventExtractor:
             key=lambda pair: (pair[0].confidence, len(pair[1])),
             reverse=True,
         )[0]
+        is_super = rule.super_event or rule.confidence >= 0.75
+        if announcement and rule.event_type == "other":
+            is_super = False
         return EventResult(
             date=item.date,
             code=item.code,
@@ -110,7 +197,7 @@ class RuleBasedEventExtractor:
             impact_duration_days=rule.duration_days,
             confidence_score=rule.confidence,
             event_strength=_event_strength(rule),
-            is_super_event=rule.super_event or rule.confidence >= 0.75,
+            is_super_event=is_super,
             is_priced_in=_looks_priced_in(text),
             source=item.source,
             matched_keywords=matched_keywords,
@@ -194,3 +281,11 @@ def _event_strength(rule: EventRule) -> float:
 
 def _looks_priced_in(text: str) -> bool:
     return any(keyword in text for keyword in ["连续上涨", "高位", "涨幅已", "创新高", "放量大涨", "冲高回落"])
+
+
+def _is_announcement_item(item: NewsItem) -> bool:
+    source = (item.source or "").lower()
+    title = item.title or ""
+    if "公告" in source or "notice" in source:
+        return True
+    return any(keyword in title for keyword in ("公告", "年度报告", "半年度报告", "一季度报告", "业绩预告"))

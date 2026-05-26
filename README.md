@@ -118,6 +118,47 @@ python news_pipeline.py --stock-code sh.600036 --announcements --announcement-fe
 
 本地人工公告 CSV 仍可通过 `--announcement-local` 接入；与已有 `--news-csv` 合并时使用 `--merge-news-csv`。
 
+稀疏强事件特征（公告专用，压低股吧噪声）：
+
+```bash
+python news_pipeline.py --stock-code sh.600036 --announcements --announcement-only --sparse-strong-events --announcement-start 2019-01-01 --announcement-end 2019-12-31 --output-root stockdata_announcements_sparse_2019
+```
+
+策略 walk-forward 对比（验证规则事件是否有 edge）：
+
+```bash
+python strategy_walk_forward.py --data-dir stockdata_announcements_sparse_2019 --start-date 2019-01-01 --strategies buy_and_hold,rule_event,rule_event_planner,ppo_only
+```
+
+报告输出到 `reports/strategy_compare/`。
+
+## 银行板块 Panel 扩充（时间 × 空间 × 文本）
+
+一键流水线（下载 20 股 K 线 + 公告 + panel 训练 + walk-forward）：
+
+```bash
+python run_bank_alpha_pipeline.py --start-date 2024-01-01 --end-date 2026-05-25
+```
+
+快速试跑（仅 3 只股票）：
+
+```bash
+python run_bank_alpha_pipeline.py --quick --timesteps 4096
+```
+
+分步命令：
+
+```bash
+python batch_get_stock_data.py --start-date 2018-01-01 --end-date 2019-12-31
+python batch_announcement_pipeline.py --start-date 2018-01-01 --end-date 2019-12-31
+python build_panel_dataset.py
+python panel_feature_analysis.py
+python main_panel.py --opportunity-cost-penalty 2.0 --timesteps 50000
+python walk_forward_panel.py --strategies rule_event,ppo_panel --opportunity-cost-penalty 2.0
+```
+
+核心脚本：`bank_universe.py`、`MultiStockTradingEnv`、`panel_dynamic_data.py`。
+
 新闻特征默认后移一天，避免训练时偷看未来。
 
 用同一个随机种子进行无新闻和新闻融合对比：
